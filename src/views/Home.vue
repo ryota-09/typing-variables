@@ -26,7 +26,6 @@ import { Component, Vue } from "vue-property-decorator";
 export default class Home extends Vue {
   private targetTextArray = Array<string>();
   private pressedKey = "";
-  private slicedStr = "";
 
   startButton(): void {
     this.createText();
@@ -48,10 +47,14 @@ export default class Home extends Vue {
   checkStr(clickedKey: string, targetTextStr: string): void{
     if ( clickedKey === targetTextStr ){
       console.log("key正解");
+      this.targetTextArray.splice(0, 1);
     } else {
       console.log("間違い");
       return;
     }
+    if(!this.targetTextArray.length){//this.targetTextArray === []ではダメだった。なぜ？？
+        this.createText();
+      }
   }
 
   get variableArray(): Array<string> {
