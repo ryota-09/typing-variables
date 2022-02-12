@@ -4,13 +4,16 @@
     <div class="about"><span>テキストが入ります。</span></div>
     <div class="variableList"><span>ここに一覧表を表示します。</span></div>
     <div class="display-field">
-      <p class="count">60</p>
-      <div class="wrap">
+      <p class="count">{{ limitTime }}</p>
+      <div class="wrap" v-bind:class="{'not-correct': isNotCorrect}">
         <p class="variable-text">
           <span v-for="text of targetTextArray" v-bind:key="text">
             <span class="each-str">{{ text }}</span>
           </span>
         </p>
+      </div>
+      <div class="correct-count">
+        <span>{{ correctCount }} 文字</span>
       </div>
       <div class="start-button">
         <span v-on:click="startButton" v-on:keydown="startButton">ボタン</span>
@@ -26,13 +29,17 @@ import { Component, Vue } from "vue-property-decorator";
 export default class Home extends Vue {
   private targetTextArray = Array<string>();
   private pressedKey = "";
+  private correctCount = 0;
+  private limitTime = 30;
+  private isNotCorrect = false;
 
   startButton(): void {
     this.createText();
     this.keyDown();
+    this.timer();
   }
 
-  createText(): void{
+  createText(): void {
     let ran = Math.floor(Math.random() * this.variableArray.length);
     this.targetTextArray = this.variableArray[ran].split("");
   }
@@ -44,17 +51,35 @@ export default class Home extends Vue {
     });
   }
 
-  checkStr(clickedKey: string, targetTextStr: string): void{
-    if ( clickedKey === targetTextStr ){
-      console.log("key正解");
+  checkStr(clickedKey: string, targetTextStr: string): void {
+    if (clickedKey === targetTextStr) {
+      this.isNotCorrect = false;
+      this.correctCount++;
       this.targetTextArray.splice(0, 1);
+    } else if( clickedKey === "Shift"){
+      this.isNotCorrect = false;
     } else {
-      console.log("間違い");
-      return;
+      this.isNotCorrect = true;
     }
-    if(!this.targetTextArray.length){//this.targetTextArray === []ではダメだった。なぜ？？
-        this.createText();
+    if (!this.targetTextArray.length) {
+      //this.targetTextArray === []ではダメだった。なぜ？？
+      this.createText();
+    }
+  }
+
+  timer(): void {
+    const timeFunc = setInterval(() => {
+      if (this.limitTime === 0) {
+        clearInterval(timeFunc);
+        this.gameOver();
+        return;
       }
+      this.limitTime--;
+    }, 1000);
+  }
+
+  gameOver(): void {
+    alert("ゲーム終了");
   }
 
   get variableArray(): Array<string> {
@@ -78,5 +103,8 @@ export default class Home extends Vue {
   background-color: #a4b0be;
   font-weight: bold;
   color: #fff;
+}
+.not-correct {
+  background-color: red;
 }
 </style>
